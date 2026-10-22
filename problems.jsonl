@@ -1,0 +1,20 @@
+{"id": "ALG1", "topic": "algebra", "difficulty": "easy", "problem": "Resuelve para x: 3x + 7 = 2x - 5.", "answer": "-12"}
+{"id": "ALG2", "topic": "algebra", "difficulty": "easy", "problem": "Cual es la suma de las raices de x^2 - 5x + 6 = 0?", "answer": "5"}
+{"id": "ALG3", "topic": "algebra", "difficulty": "medium", "problem": "Simplifica la expresion (x^2 - 9)/(x - 3) para x distinto de 3.", "answer": "x + 3"}
+{"id": "ALG4", "topic": "algebra", "difficulty": "hard", "problem": "Resuelve para x (con x > 2): log_2(x) + log_2(x - 2) = 3.", "answer": "4"}
+{"id": "ALG5", "topic": "algebra", "difficulty": "hard", "problem": "Cuantas soluciones reales tiene la ecuacion x^4 - 5x^2 + 4 = 0?", "answer": "4"}
+{"id": "CAL1", "topic": "calculo", "difficulty": "easy", "problem": "Calcula la derivada de x^3 respecto a x.", "answer": "3*x**2"}
+{"id": "CAL2", "topic": "calculo", "difficulty": "medium", "problem": "Evalua la integral definida de 3x^2 desde 0 hasta 2.", "answer": "8"}
+{"id": "CAL3", "topic": "calculo", "difficulty": "medium", "problem": "Calcula el limite de sin(x)/x cuando x tiende a 0.", "answer": "1"}
+{"id": "CAL4", "topic": "calculo", "difficulty": "hard", "problem": "Evalua la integral de (sin(x))^2 desde 0 hasta pi.", "answer": "pi/2"}
+{"id": "CAL5", "topic": "calculo", "difficulty": "hard", "problem": "Halla el area de la region encerrada entre las curvas y = x^2 y y = 2x.", "answer": "4/3"}
+{"id": "PRB1", "topic": "probabilidad", "difficulty": "easy", "problem": "De cuantas formas distintas se pueden ordenar las 4 letras de la palabra MATH?", "answer": "24"}
+{"id": "PRB2", "topic": "probabilidad", "difficulty": "easy", "problem": "Se lanza una moneda justa 3 veces. Cual es la probabilidad de obtener exactamente 2 caras?", "answer": "3/8"}
+{"id": "PRB3", "topic": "probabilidad", "difficulty": "medium", "problem": "Se lanzan dos dados justos de 6 caras. Cual es la probabilidad de que la suma sea 7?", "answer": "1/6"}
+{"id": "PRB4", "topic": "probabilidad", "difficulty": "hard", "problem": "Cuantos numeros enteros de 3 digitos tienen sus tres digitos distintos entre si?", "answer": "648"}
+{"id": "PRB5", "topic": "probabilidad", "difficulty": "hard", "problem": "En un grupo de 4 personas, cual es la probabilidad de que al menos dos compartan el mismo mes de nacimiento (12 meses equiprobables)? Da la respuesta como fraccion.", "answer": "41/96"}
+{"id": "NUM1", "topic": "teoria_numeros", "difficulty": "easy", "problem": "Cual es el maximo comun divisor de 48 y 36?", "answer": "12"}
+{"id": "NUM2", "topic": "teoria_numeros", "difficulty": "easy", "problem": "Cuanto vale 7! (el factorial de 7)?", "answer": "5040"}
+{"id": "NUM3", "topic": "teoria_numeros", "difficulty": "medium", "problem": "Cuantos divisores positivos tiene el numero 36?", "answer": "9"}
+{"id": "NUM4", "topic": "teoria_numeros", "difficulty": "hard", "problem": "Cual es el residuo de dividir 3^100 entre 100?", "answer": "1"}
+{"id": "NUM5", "topic": "teoria_numeros", "difficulty": "hard", "problem": "Cual es el ultimo digito (digito de las unidades) de 7^2023?", "answer": "3"}
