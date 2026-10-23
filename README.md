@@ -22,8 +22,9 @@ accuracy costs — the kind of evidence an AI team needs before committing a mod
   string equality. 10/10 grader unit tests; every canonical answer independently verified by CAS.
 - **Cost accounting**: real USD cost per model from token usage, with per-problem and total cost.
 - **Domain expertise**: the problem set and answer keys are authored and CAS-verified by a
-  mathematician. The questions are in Spanish — the grader is language-agnostic, so the harness
-  doubles as a **multilingual** reasoning eval.
+  mathematician. The questions are in English, and the grader is **language-agnostic** (it judges
+  mathematical equivalence, not text), so the same harness works unchanged on a problem set written
+  in any language.
 - **Engineering**: async concurrency, graceful error/refusal handling, reproducible JSONL output.
 
 ## Results

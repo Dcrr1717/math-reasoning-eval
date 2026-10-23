@@ -1,15 +1,15 @@
-"""Benchmark de razonamiento matematico: compara modelos de Claude en costo vs. precision.
+"""Math reasoning benchmark: compares Claude models on cost vs. accuracy.
 
-Para cada (modelo, problema) hace una llamada a la Messages API, pide razonar y
-terminar con 'FINAL: <respuesta>', califica con el calificador simbolico (grader.py)
-y acumula tokens -> costo en dolares. Produce un reporte markdown y un JSONL de
-resultados crudos.
+For each (model, problem) it makes one Messages API call, asks the model to reason and
+finish with 'FINAL: <answer>', grades with the symbolic grader (grader.py) and
+accumulates tokens -> cost in dollars. Produces a markdown report and a JSONL of
+raw results.
 
-Uso:
+Usage:
     pip install -r requirements.txt
-    export ANTHROPIC_API_KEY=sk-ant-...        (o set en Windows)
-    python run_eval.py --limit 2               # prueba barata (2 problemas)
-    python run_eval.py                          # corrida completa (3 modelos x 20 problemas)
+    export ANTHROPIC_API_KEY=sk-ant-...        (or set on Windows)
+    python run_eval.py --limit 2               # cheap test (2 problems)
+    python run_eval.py                          # full run (3 models x 20 problems)
     python run_eval.py --models claude-sonnet-5-5 claude-opus-5-5
 """
 from __future__ import annotations
@@ -26,7 +26,7 @@ from anthropic import AsyncAnthropic
 
 from grader import calificar
 
-# Tarifas USD por millon de tokens (API de Anthropic, 1a parte). Prompts < 100K.
+# USD rates per million tokens (first-party Anthropic API). Prompts < 100K.
 PRECIOS = {
     "claude-haiku-5-5": (0.10, 0.50),
     "claude-sonnet-5-5": (2.00, 10.00),
@@ -35,10 +35,10 @@ PRECIOS = {
 MODELOS_POR_DEFECTO = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"]
 
 SYSTEM = (
-    "Eres un asistente matematico riguroso. Resuelve el problema mostrando el "
-    "razonamiento necesario y en la ULTIMA linea escribe exactamente 'FINAL: <respuesta>', "
-    "con la respuesta en su forma mas simple (un numero, una fraccion como 3/8, o una "
-    "expresion). No incluyas unidades ni texto extra en esa linea."
+    "You are a rigorous math assistant. Solve the problem showing the "
+    "reasoning needed and, on the LAST line, write exactly 'FINAL: <answer>', "
+    "with the answer in its simplest form (a number, a fraction like 3/8, or an "
+    "expression). Do not include units or extra text on that line."
 )
 
 
@@ -83,8 +83,8 @@ async def correr(args):
     problemas = cargar_problemas(args.problems, args.limit)
     tareas = [una_llamada(client, sem, m, p, r, args.max_tokens, not args.no_thinking)
               for m in args.models for p in problemas for r in range(args.repeats)]
-    print(f"Corriendo {len(tareas)} llamadas: {len(args.models)} modelos x {len(problemas)} "
-          f"problemas x {args.repeats} repeticion(es)...")
+    print(f"Running {len(tareas)} calls: {len(args.models)} models x {len(problemas)} "
+          f"problems x {args.repeats} repeat(s)...")
     resultados = await asyncio.gather(*tareas)
     return problemas, resultados
 
@@ -100,11 +100,11 @@ def reporte(problemas, resultados, args) -> str:
         por_mod[r["modelo"]].append(r)
     dificultades = ["easy", "medium", "hard"]
 
-    L = ["# Benchmark de razonamiento matematico - Claude\n",
-         f"{len(problemas)} problemas | {args.repeats} repeticion(es) | "
-         f"pensamiento: {'off' if args.no_thinking else 'adaptive'}\n",
-         "\n## Resumen por modelo\n",
-         "| Modelo | Precision | Costo total | Costo/problema | Tokens (in/out) | Lat. media |",
+    L = ["# Math reasoning benchmark - Claude\n",
+         f"{len(problemas)} problems | {args.repeats} repeat(s) | "
+         f"thinking: {'off' if args.no_thinking else 'adaptive'}\n",
+         "\n## Summary by model\n",
+         "| Model | Accuracy | Total cost | Cost/problem | Tokens (in/out) | Mean lat. |",
          "|---|---|---|---|---|---|"]
     filas_costo = {}
     for m in args.models:
@@ -119,7 +119,7 @@ def reporte(problemas, resultados, args) -> str:
         L.append(f"| {m} | {acc*100:.0f}% | ${ct:.4f} | ${ct/max(len(problemas)*args.repeats,1):.4f} "
                  f"| {ti:,}/{to:,} | {lat:.1f}s |")
 
-    L.append("\n## Precision por dificultad\n")
+    L.append("\n## Accuracy by difficulty\n")
     L.append("| Modelo | " + " | ".join(dificultades) + " |")
     L.append("|---|" + "|".join(["---"] * len(dificultades)) + "|")
     for m in args.models:
@@ -132,12 +132,12 @@ def reporte(problemas, resultados, args) -> str:
 
     costo_total = sum(x["costo"] for x in resultados)
     errores = [x for x in resultados if x.get("error")]
-    L.append(f"\n**Costo total de esta corrida: ${costo_total:.4f}**")
+    L.append(f"\n**Total cost of this run: ${costo_total:.4f}**")
     if errores:
-        L.append(f"\n> {len(errores)} llamada(s) con error (p. ej. {errores[0]['error'][:120]})")
-    L.append("\n## Lectura\n"
-             "La frontera costo-precision: el modelo elegido debe estar en el punto donde una mejora "
-             "de precision ya no justifica el salto de costo. Haiku da el piso barato; Opus, el techo.\n")
+        L.append(f"\n> {len(errores)} call(s) with errors (e.g. {errores[0]['error'][:120]})")
+    L.append("\n## Reading\n"
+             "The cost-accuracy frontier: the chosen model should sit at the point where a gain "
+             "in accuracy no longer justifies the jump in cost. Haiku gives the cheap floor; Opus, the ceiling.\n")
     texto = "\n".join(L)
     (out / "reporte.md").write_text(texto, encoding="utf-8")
     return texto, costo_total
@@ -148,7 +148,7 @@ def main():
     ap.add_argument("--models", nargs="+", default=MODELOS_POR_DEFECTO)
     ap.add_argument("--problems", default="problems.jsonl")
     ap.add_argument("--repeats", type=int, default=1)
-    ap.add_argument("--limit", type=int, default=None, help="usar solo los primeros N problemas")
+    ap.add_argument("--limit", type=int, default=None, help="use only the first N problems")
     ap.add_argument("--max-tokens", type=int, default=8000)
     ap.add_argument("--concurrency", type=int, default=5)
     ap.add_argument("--no-thinking", action="store_true")
@@ -156,13 +156,13 @@ def main():
     args = ap.parse_args()
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("ERROR: define ANTHROPIC_API_KEY en el entorno antes de correr.")
+        print("ERROR: set ANTHROPIC_API_KEY in the environment before running.")
         raise SystemExit(1)
 
     problemas, resultados = asyncio.run(correr(args))
     texto, costo_total = reporte(problemas, resultados, args)
     print("\n" + texto)
-    print(f"\nGuardado en {args.out}/reporte.md y {args.out}/resultados.jsonl")
+    print(f"\nSaved to {args.out}/reporte.md and {args.out}/resultados.jsonl")
 
 
 if __name__ == "__main__":

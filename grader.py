@@ -1,9 +1,9 @@
-"""Calificador simbolico para el benchmark de razonamiento matematico.
+"""Symbolic grader for the math reasoning benchmark.
 
-Extrae la respuesta final del texto del modelo (linea 'FINAL: ...') y la compara
-con la respuesta canonica usando equivalencia simbolica (sympy), no coincidencia
-exacta de cadenas. Asi 'x + 3', '3+x' y '3 + x' cuentan como correctas, y '3/8'
-equivale a '0.375'.
+Extracts the model's final answer from its text (the 'FINAL: ...' line) and compares
+it against the canonical answer using symbolic equivalence (sympy), not exact string
+matching. This way 'x + 3', '3+x' and '3 + x' all count as correct, and '3/8' is
+equivalent to '0.375'.
 """
 from __future__ import annotations
 
@@ -19,39 +19,39 @@ from sympy.parsing.sympy_parser import (
 
 _TRANSFORMS = standard_transformations + (
     implicit_multiplication_application,
-    convert_xor,  # permite usar ^ como potencia
+    convert_xor,  # allows using ^ as exponentiation
 )
 
-# Normalizaciones de simbolos que suelen escribir los modelos
+# Symbol normalizations that models commonly write
 _SUBS = {
     "\u03c0": "pi",   # pi
-    "\u221a": "sqrt", # raiz
+    "\u221a": "sqrt", # square root
     "\u00f7": "/",
     "\u00d7": "*",
-    "\u2212": "-",    # signo menos unicode
-    ",": "",          # separador de miles (1,024 -> 1024); los decimales usan punto
+    "\u2212": "-",    # unicode minus sign
+    ",": "",          # thousands separator (1,024 -> 1024); decimals use a dot
 }
 
 
 def extract_final(texto: str) -> str | None:
-    """Toma lo que sigue a la ultima aparicion de 'FINAL:' (o 'RESPUESTA:')."""
+    """Takes whatever follows the last occurrence of 'FINAL:' (or 'RESPUESTA:')."""
     if not texto:
         return None
     patrones = re.findall(r"(?:FINAL|RESPUESTA)\s*[:=]\s*(.+)", texto, flags=re.IGNORECASE)
     if patrones:
         bruto = patrones[-1].strip()
     else:
-        # respaldo: ultima linea no vacia
+        # fallback: last non-empty line
         lineas = [l.strip() for l in texto.strip().splitlines() if l.strip()]
         if not lineas:
             return None
         bruto = lineas[-1]
-    # limpiar envoltorios comunes
+    # strip common wrappers
     bruto = bruto.strip().strip("$").strip()
     bruto = re.sub(r"\\boxed\{(.+?)\}", r"\1", bruto)   # \boxed{...}
     bruto = re.sub(r"\\text\{.*?\}", "", bruto)
     bruto = bruto.rstrip(".")
-    # si viene 'x = 4' tomamos lo de la derecha del ultimo '='
+    # if it comes as 'x = 4' we take what is to the right of the last '='
     if bruto.count("=") >= 1 and not bruto.lstrip().startswith("="):
         bruto = bruto.split("=")[-1].strip()
     for a, b in _SUBS.items():
@@ -67,14 +67,14 @@ def _a_expr(s: str):
 
 
 def son_equivalentes(respuesta_modelo: str, respuesta_canonica: str) -> bool:
-    """True si ambas expresiones son matematicamente equivalentes."""
+    """True if both expressions are mathematically equivalent."""
     if respuesta_modelo is None:
         return False
     try:
         a = _a_expr(respuesta_modelo)
         b = _a_expr(respuesta_canonica)
     except Exception:
-        # ultimo recurso: comparacion textual normalizada
+        # last resort: normalized text comparison
         return respuesta_modelo.replace(" ", "").lower() == respuesta_canonica.replace(" ", "").lower()
     try:
         if sp.simplify(a - b) == 0:
@@ -82,7 +82,7 @@ def son_equivalentes(respuesta_modelo: str, respuesta_canonica: str) -> bool:
     except Exception:
         pass
     try:
-        # comparacion numerica para constantes
+        # numeric comparison for constants
         if abs(complex(sp.N(a)) - complex(sp.N(b))) < 1e-9:
             return True
     except Exception:
@@ -96,7 +96,7 @@ def calificar(texto_modelo: str, respuesta_canonica: str) -> tuple[bool, str | N
 
 
 if __name__ == "__main__":
-    # autocomprobacion rapida (sin API)
+    # quick self-check (no API)
     casos = [
         ("razonamiento...\nFINAL: -12", "-12", True),
         ("FINAL: x + 3", "x + 3", True),
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     ok = 0
     for texto, canon, esperado in casos:
         res, final = calificar(texto, canon)
-        marca = "OK" if res == esperado else "FALLA"
+        marca = "OK" if res == esperado else "FAIL"
         if res == esperado:
             ok += 1
-        print(f"[{marca}] canon={canon!r} extraido={final!r} -> {res} (esperado {esperado})")
-    print(f"\n{ok}/{len(casos)} casos de prueba del calificador pasaron")
+        print(f"[{marca}] canon={canon!r} extracted={final!r} -> {res} (expected {esperado})")
+    print(f"\n{ok}/{len(casos)} grader test cases passed")
